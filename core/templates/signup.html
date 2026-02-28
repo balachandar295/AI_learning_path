@@ -1,0 +1,107 @@
+
+{% load static %} 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    ...
+    <link rel="stylesheet" href="{% static 'basic.css' %}">
+
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">AI Learning Path</div>
+        <nav>
+            <a href="basic.html">Home</a>
+            <a href="#features">Features</a>
+            <a href="login.html">Login</a>
+            <a href="#signup-section" class="btn-signup">Sign Up</a>
+        </nav>
+    </header>
+
+    <section id="signup-section" class="auth-container bg-alt">
+        <div class="auth-card">
+            <h2>Create a New Account</h2>
+            <p class="subtitle">Get Started with AI Learning</p>
+            
+            <form id="registrationForm">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" placeholder="John Doe" required>
+                </div>
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="email@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Create password" required>
+                </div>
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+                </div>
+                <div class="terms">
+                    <label><input type="checkbox" required> I agree to the Terms and Conditions</label>
+                </div>
+                <button type="submit" class="auth-btn signup-btn">Register</button>
+            </form>
+            
+            <p class="redirect">Already have an account? <a href="login.html">Login</a></p>
+        </div>
+    </section>
+
+    <script>
+// CSRF token-ai edukka indha function KANDIPPA venum
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const fullName = document.getElementById('fullName').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('https://ai-learning-path-6.onrender.com/register/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                full_name: fullName,
+                email: email,
+                password: password
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert("Signup Success! ✅");
+            window.location.href = "/login.html"; 
+        } else {
+            alert("Error: " + (result.error || "Details correct-aa kudunga"));
+        }
+    } catch (error) {
+        console.error("Technical Error:", error);
+        alert("Backend server (Django) run aagala!");
+    }
+});
+</script>
+</body>
+</html>

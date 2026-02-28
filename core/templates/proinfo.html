@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Preferences - AI Learning Path</title>
+    <link rel="stylesheet" href="basic.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="form-page-wrapper">
+        <form id="profileForm">
+            <h1>3. Information Collection</h1>
+            <span class="subtitle">Personalize your learning path</span>
+
+            <div class="section-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" name="fullname" placeholder="Enter your name" required>
+            </div>
+
+            <div class="section-group">
+                <label for="email">Email ID (Same as Signup)</label>
+                <input type="email" id="email" name="email" placeholder="name@example.com" required>
+            </div>
+
+            <hr>
+
+            <div class="section-group">
+                <h3>Current Skill Level</h3>
+                <ul>
+                    <li><input type="radio" id="beginner" name="skill" value="Beginner" required> <label for="beginner">Beginner</label></li>
+                    <li><input type="radio" id="intermediate" name="skill" value="Intermediate"> <label for="intermediate">Intermediate</label></li>
+                    <li><input type="radio" id="advanced" name="skill" value="Advanced"> <label for="advanced">Advanced</label></li>
+                </ul>
+            </div>
+
+            <div class="section-group">
+                <h3>Learning Goal</h3>
+                <ul>
+                    <li><input type="radio" id="goal1" name="goal" value="Competitive Programming" required> <label for="goal1">Competitive Programming</label></li>
+                    <li><input type="radio" id="goal2" name="goal" value="Coding Interviews"> <label for="goal2">Coding Interviews</label></li>
+                    <li><input type="radio" id="goal3" name="goal" value="Company-Specific Preparation"> <label for="goal3">Company-Specific Preparation</label></li>
+                </ul>
+            </div>
+
+            <div class="section-group">
+                <h3>Preferred Programming Language</h3>
+                <select id="language" name="language" required>
+                    <option value="" disabled selected>Select a language</option>
+                    <option value="Python">Python</option>
+                    <option value="C">C</option>
+                    <option value="C++">C++</option>
+                    <option value="Java">Java</option>
+                </select>
+            </div>
+
+            <div class="section-group">
+                <h3>Daily Study Time</h3>
+                <ul>
+                    <li><input type="radio" id="time1" name="study_time" value="1 Hour" required> <label for="time1">1 Hour</label></li>
+                    <li><input type="radio" id="time2" name="study_time" value="2 Hours"> <label for="time2">2 Hours</label></li>
+                    <li><input type="radio" id="time3" name="study_time" value="3 Hours +"> <label for="time3">3 Hours +</label></li>
+                </ul>
+            </div>
+
+            <div class="section-group">
+                <h3>Target Duration</h3>
+                <ul>
+                    <li><input type="radio" id="dur1" name="duration" value="1 Month" required> <label for="dur1">1 Month</label></li>
+                    <li><input type="radio" id="dur2" name="duration" value="2 Months"> <label for="dur2">2 Months</label></li>
+                    <li><input type="radio" id="dur3" name="duration" value="3 Months"> <label for="dur3">3 Months</label></li>
+                </ul>
+            </div>
+
+            <button type="submit" class="auth-btn">Submit</button>
+        </form>
+    </div>
+
+   <script>
+    window.onload = function() {
+        const savedEmail = localStorage.getItem('userEmail');
+        if (savedEmail) {
+            document.getElementById('email').value = savedEmail;
+        }
+    };
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = {
+            email: document.getElementById('email').value,
+            skill: document.querySelector('input[name="skill"]:checked')?.value,
+            goal: document.querySelector('input[name="goal"]:checked')?.value,
+            language: document.getElementById('language').value,
+            study_time: document.querySelector('input[name="study_time"]:checked')?.value,
+            duration: document.querySelector('input[name="duration"]:checked')?.value
+        };
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/update-profile/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                localStorage.setItem('userSkill', formData.skill);
+                localStorage.setItem('userLanguage', formData.language);
+                
+                alert("Profile Saved! Let's take a quick skill assessment test. ✅");
+                // Ippo correct-ana URL-ku pogum
+                window.location.href = "/assessment/"; 
+            } else {
+                alert("Backend update failed. Check your Django views.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Server connect aagala! Check if Django 'runserver' is active.");
+        }
+    });
+    // Submit logic kulla idhu kandippa irukkanum
+localStorage.setItem('userSkill', formData.skill);
+</script>
+</body>
+</html>
+<style>
+    
+    /* --- 1. Global Reset & Dark Background --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #1e1e2f; /* Dark background from your screenshot */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+/* --- 2. The Big White Card Container --- */
+.form-page-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+form {
+    background: #ffffff;
+    padding: 60px 80px;
+    border-radius: 40px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 1100px; /* Matching the extra-wide look */
+    position: relative;
+    overflow: hidden;
+}
+
+/* The neon top border accent */
+form::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: linear-gradient(90deg, #00d4ff, #6c63ff);
+}
+
+/* --- 3. Headers & Subtitles --- */
+h1 {
+    font-size: 28px;
+    color: #1e1e2f;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    display: block;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 40px;
+}
+
+h3 {
+    font-size: 14px;
+    color: #1e1e2f;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+/* --- 4. Inputs & Selection Alignment --- */
+.section-group {
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 600px; /* Keeps input fields from stretching too wide */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+input[type="text"],
+input[type="email"],
+select {
+    width: 100%;
+    padding: 14px 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: #f9fafb;
+    font-size: 14px;
+    transition: 0.3s;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #00d4ff;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+}
+
+/* --- 5. Radio Buttons List --- */
+ul {
+    list-style: none;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+input[type="radio"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #00d4ff;
+}
+
+li label {
+    margin-bottom: 0; /* Align labels next to radio circles */
+    font-weight: 500;
+    text-transform: none;
+    cursor: pointer;
+}
+
+/* --- 6. Submit Button --- */
+.auth-btn {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 40px auto 0;
+    padding: 16px;
+    background: #1e1e2f;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.auth-btn:hover {
+    background: #00d4ff;
+    color: #1e1e2f;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>

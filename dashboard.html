@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Path Finder | Pro Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #030712; 
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #00d4ff; 
+            --secondary: #6366f1; 
+            --accent: #f43f5e;
+            --text-dim: #64748b;
+        }
+
+        body { 
+            background-color: var(--bg); 
+            color: #f8fafc;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(0, 212, 255, 0.1) 0%, transparent 35%),
+                radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.1) 0%, transparent 35%);
+            min-height: 100vh;
+        }
+
+        .navbar { 
+            background: rgba(3, 7, 18, 0.8);
+            backdrop-filter: blur(15px);
+            padding: 1rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .logo { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; color: var(--primary); font-size: 1.5rem; }
+
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: 300px 1fr 340px; 
+            gap: 2rem; 
+            padding: 2rem 4rem; 
+        }
+
+        .glass-card { 
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, border 0.3s ease;
+        }
+
+        .glass-card:hover { border-color: rgba(0, 212, 255, 0.3); transform: translateY(-5px); }
+
+        /* --- AI Skill Badges --- */
+        .badge-container { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .badge { 
+            background: rgba(0, 212, 255, 0.1); 
+            border: 1px solid var(--primary); 
+            color: var(--primary);
+            padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* --- Analysis Layout --- */
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .mini-stat { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 16px; border: 1px solid var(--glass-border); }
+        .mini-stat h4 { margin: 0; color: var(--text-dim); font-size: 0.8rem; }
+        .mini-stat p { margin: 5px 0 0; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+
+        /* --- Recommended Videos --- */
+        .video-card {
+            display: flex; gap: 1rem; margin-top: 1rem;
+            background: rgba(255,255,255,0.02);
+            padding: 10px; border-radius: 12px; cursor: pointer;
+            transition: 0.3s;
+        }
+        .video-card:hover { background: rgba(255,255,255,0.08); }
+        .video-thumb { width: 80px; height: 50px; background: #1e1e2f; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+
+        /* --- Neon Controls --- */
+        .neon-btn {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none; color: white; padding: 12px; border-radius: 12px;
+            font-weight: bold; cursor: pointer; width: 100%; box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">AI_COMMAND_CENTER</div>
+    <div style="display: flex; gap: 20px; align-items: center;">
+        <span style="font-size: 0.8rem; color: var(--text-dim);"><i class="fa fa-circle status-dot"></i> SYSTEM_ONLINE</span>
+        <button onclick="logout()" style="background:none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 8px; cursor: pointer;">EXIT</button>
+    </div>
+</nav>
+
+<div class="dashboard-grid">
+    <aside style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="glass-card">
+            <div style="text-align: center;">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Felix" style="width: 80px; margin-bottom: 1rem; filter: drop-shadow(0 0 10px var(--primary));">
+                <h3 style="margin: 0; font-family: 'Orbitron';">BALA_R</h3>
+                <p style="color: var(--text-dim); font-size: 0.8rem;">Tier: Advanced Strategist</p>
+            </div>
+            <div class="badge-container">
+                <span class="badge">Python</span> <span class="badge">Deep Learning</span> <span class="badge">Automation</span>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h4>Daily Goals</h4>
+            <div style="font-size: 0.8rem;">
+                <p><input type="checkbox" checked> Complete Logic Loop</p>
+                <p><input type="checkbox"> Solve Advanced RegEx</p>
+                <p><input type="checkbox"> Watch Neural Networks Vol 1</p>
+            </div>
+        </div>
+    </aside>
+
+    <main style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="glass-card">
+            <h3 style="margin-top: 0;">Neural Performance Index</h3>
+            <div class="analysis-grid">
+                <div style="position: relative; width: 180px;">
+                    <canvas id="mainChart"></canvas>
+                    <div style="position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align: center;">
+                        <span id="scoreNum" style="font-size: 2rem; font-weight: bold; color: var(--primary);">0</span>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="mini-stat"><h4>Accuracy</h4><p>94.2%</p></div>
+                    <div class="mini-stat"><h4>Streak</h4><p>12 Days</p></div>
+                    <div class="mini-stat"><h4>Rank</h4><p>Top 2%</p></div>
+                    <div class="mini-stat"><h4>Level</h4><p>Lvl 42</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h4 style="margin-top:0;">Global Contribution Heatmap</h4>
+            <div id="heatmap" style="display: grid; grid-template-columns: repeat(30, 1fr); gap: 4px;"></div>
+        </div>
+    </main>
+
+    <aside style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="glass-card">
+            <h4 style="margin-top: 0; color: var(--primary);">AI Suggested Content</h4>
+            <div class="video-card">
+                <div class="video-thumb"><i class="fa fa-play"></i></div>
+                <div><strong style="font-size: 0.8rem;">Advanced Decorators</strong><p style="font-size: 0.7rem; color: var(--text-dim);">12 min • Pro</p></div>
+            </div>
+            <div class="video-card">
+                <div class="video-thumb"><i class="fa fa-play" style="color: var(--secondary)"></i></div>
+                <div><strong style="font-size: 0.8rem;">FastAPI Mastery</strong><p style="font-size: 0.7rem; color: var(--text-dim);">45 min • Architecture</p></div>
+            </div>
+            <button class="neon-btn" style="margin-top: 1rem;">GENERATE NEW PATH</button>
+        </div>
+
+        <div class="glass-card" style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(99, 102, 241, 0.05));">
+            <h4 style="margin-top:0;">System Log</h4>
+            <div style="font-size: 0.7rem; font-family: 'Courier New', monospace; color: var(--text-dim);">
+                <p>> Session started at 19:59</p>
+                <p>> Neural weights updated...</p>
+                <p style="color: var(--primary);">> Assessment #4 completed.</p>
+            </div>
+        </div>
+    </aside>
+</div>
+<script>
+    function logout() { 
+        localStorage.clear(); 
+        window.location.href = "login.html"; 
+    }
+
+    window.onload = function() {
+        // 1. Get Real Data from LocalStorage
+        const userScore = parseInt(localStorage.getItem('userScore')) || 0;
+        const userEmail = localStorage.getItem('userEmail') || "PRO_USER";
+        
+        // Update UI Text
+        document.getElementById('scoreNum').innerText = userScore;
+        // Optional: Update name from email
+        const namePart = userEmail.split('@')[0].toUpperCase();
+        if(document.getElementById('profileName')) {
+            document.getElementById('profileName').innerText = namePart;
+        }
+
+        // 2. WORKING NEURAL INDEX (Chart Logic)
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    // Score is the cyan part, (20 - score) is the empty dark part
+                    data: [userScore, 20 - userScore], 
+                    backgroundColor: [ '#00d4ff', 'rgba(255,255,255,0.05)' ],
+                    borderWidth: 0,
+                    borderRadius: 10,
+                    hoverOffset: 4
+                }]
+            },
+            options: { 
+                cutout: '85%', 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                animation: { animateRotate: true, duration: 2000 }
+            }
+        });
+
+        // 3. WORKING GLOBAL HEATMAP (Activity Logic)
+        const heatmap = document.getElementById('heatmap');
+        heatmap.innerHTML = ''; // Clear existing
+
+        // Simulation: Let's assume user was active on these specific days
+        // In a real app, you'd fetch this array from your Backend API
+        const activeDays = [5, 12, 18, 25, 40, 41, 42, 60, 88, 110, 111]; 
+
+        for (let i = 0; i < 210; i++) {
+            const cell = document.createElement('div');
+            cell.style.cssText = `
+                aspect-ratio: 1/1; 
+                border-radius: 2px; 
+                background: rgba(255,255,255,0.03);
+                transition: 0.3s;
+                cursor: pointer;
+            `;
+
+            // If index matches our 'activeDays', light it up!
+            if (activeDays.includes(i)) {
+                cell.style.background = "#00d4ff";
+                cell.style.boxShadow = "0 0 10px rgba(0, 212, 255, 0.5)";
+            }
+
+            // Hover effect to see detail
+            cell.onmouseover = () => {
+                cell.style.transform = "scale(1.5)";
+                cell.style.zIndex = "10";
+            };
+            cell.onmouseout = () => {
+                cell.style.transform = "scale(1)";
+                cell.style.zIndex = "1";
+            };
+
+            heatmap.appendChild(cell);
+        }
+    };
+</script>
+</body>
+</html>

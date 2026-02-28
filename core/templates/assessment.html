@@ -1,0 +1,296 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Skill Assessment</title>
+    <link rel="stylesheet" href="{% static 'basic.css' %}">
+    <style>
+        .test-wrapper { max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; }
+        .header { display: flex; justify-content: space-between; position: sticky; top: 0; background: white; padding: 10px; border-bottom: 2px solid #eee; z-index: 100; }
+        .timer { color: #e74c3c; font-weight: bold; font-size: 1.2rem; }
+        .question-block { margin: 25px 0; padding: 15px; border: 1px solid #f0f0f0; border-radius: 8px; animation: fadeIn 0.5s ease; }
+        .options-list { list-style: none; padding: 0; }
+        .instructions { background: #fffbe6; border: 1px solid #ffe58f; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        #quiz-section { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-box { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.3s; border: 2px solid #ddd; }
+    
+    /* Navigation Grid Styling */
+.nav-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%; /* Circle shape */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.nav-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+/* Question Block Animation */
+.question-block {
+    background: #ffffff;
+    border: 1px solid #eef2f5 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 30px !important;
+    border-radius: 15px !important;
+    margin-top: 20px;
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Options Styling */
+.options-list li {
+    list-style: none;
+    border: 2px solid #f0f4f8 !important;
+    transition: all 0.2s ease;
+}
+
+.options-list li:hover {
+    border-color: #00d4ff !important;
+    background-color: #f0fbff !important;
+}
+
+/* When radio is checked, highlight the whole row */
+.options-list li:has(input:checked) {
+    background-color: #e6faff !important;
+    border-color: #00d4ff !important;
+}
+
+/* Timer Styling */
+.timer {
+    background: #fff5f5;
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid #feb2b2;
+}
+
+/* Submit & Nav Buttons */
+.auth-btn {
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s;
+}
+
+.auth-btn:active {
+    transform: scale(0.95);
+}</style>
+</head>
+<body class="bg-alt">
+
+<div class="test-wrapper">
+    <div id="instruction-section">
+        <h2>Assessment Instructions</h2>
+        <div class="instructions">
+            <ul>
+                <li><strong>Total Questions:</strong> 20</li>
+                <li><strong>Time Limit:</strong> 25 Minutes</li>
+                <li><strong>Topics:</strong> Aptitude, Logical, Coding (DS/OOPs)</li>
+                <li><strong>Strict Mode:</strong> Do NOT switch tabs. Test will auto-submit.</li>
+            </ul>
+        </div>
+        <button onclick="startTest()" class="auth-btn">I am Ready - Start Test</button>
+    </div>
+
+    <div id="quiz-section">
+        <div class="header">
+            <h3 id="levelDisplay">Level: </h3>
+            <div class="timer">Time Left: <span id="time">25:00</span></div>
+        </div>
+        <form id="quizForm">
+            <div id="questionsContainer"></div>
+            </form>
+    </div>
+</div>
+<script>
+// 1. Global Variables (Orae oru dharava dhaan define pannanum)
+let timer = null;
+let timeLeft = 25 * 60; 
+let testStarted = false;
+let currentQuestionIndex = 0;
+let userAnswers = {}; 
+
+// All Questions Object (Beginner, Intermediate, Advanced)
+const allQuestions = {
+    'Beginner': [
+        { q: "Aptitude: A person buys a pen for ₹10 and sells it for ₹15. Profit %?", options: ["25%", "50%", "75%", "100%"], ans: 1 },
+        { q: "Aptitude: A train covers 120 km in 2 hours. Speed?", options: ["40 km/hr", "60 km/hr", "80 km/hr", "100 km/hr"], ans: 1 },
+        { q: "Aptitude: Average of 10, 20, and 30?", options: ["15", "20", "25", "30"], ans: 1 },
+        { q: "Aptitude: 20% of 150 is?", options: ["20", "30", "40", "50"], ans: 1 },
+        { q: "Logical: Series: 5, 10, 15, 20, ?", options: ["22", "25", "30", "28"], ans: 1 },
+        { q: "Logical: APPLE -> BQQMF, BOY -> ?", options: ["CPZ", "AQX", "CNX", "DQZ"], ans: 0 },
+        { q: "Logical: Odd one out?", options: ["Leopard", "Cougar", "Elephant", "Lion"], ans: 2 },
+        { q: "Logical: Son of my grandfather's only child?", options: ["Brother", "Father", "Uncle", "Cousin"], ans: 0 },
+        { q: "Coding: User input in Python?", options: ["get()", "input()", "read()", "scan()"], ans: 1 },
+        { q: "Coding: 3 + 2 * 2 = ?", options: ["10", "7", "8", "6"], ans: 1 },
+        { q: "Coding: Assignment symbol?", options: ["==", "=", ":=", "->"], ans: 1 },
+        { q: "Coding: Python extension?", options: [".py", ".python", ".pt", ".p"], ans: 0 },
+        { q: "OOPs: Car is Class, Maruti is?", options: ["Function", "Object", "Variable", "Data Type"], ans: 1 },
+        { q: "OOPs: Child uses father's properties?", options: ["Abstraction", "Inheritance", "Polymorphism", "Encapsulation"], ans: 1 },
+        { q: "OOPs: Hiding internal details?", options: ["Abstraction", "Inheritance", "Overloading", "Array"], ans: 0 },
+        { q: "OOPs: One name, many forms?", options: ["Polymorphism", "Inheritance", "Variable", "List"], ans: 0 },
+        { q: "DSA: LIFO principle?", options: ["Queue", "Stack", "Array", "Linked List"], ans: 1 },
+        { q: "DSA: FIFO principle?", options: ["Stack", "Queue", "Tree", "Graph"], ans: 1 },
+        { q: "DSA: Best search for Sorted list?", options: ["Linear Search", "Binary Search", "Random Search", "None"], ans: 1 },
+        { q: "DSA: Tree-like data structure?", options: ["Stack", "Array", "Tree", "Queue"], ans: 2 }
+    ],
+    'Intermediate': [
+        { q: "Aptitude: Sum amounts to ₹815 in 3yrs, ₹854 in 4yrs. Sum?", options: ["650", "690", "698", "700"], ans: 2 },
+        { q: "Aptitude: 15 men in 35 days, 21 men in?", options: ["25 days", "20 days", "15 days", "22 days"], ans: 0 },
+        { q: "Aptitude: A:B = 4:3. In 6yrs A=26. B present age?", options: ["12", "15", "18", "21"], ans: 1 },
+        { q: "Aptitude: Pipe fills 10hr, empties 15hr. Together?", options: ["20 hrs", "25 hrs", "30 hrs", "35 hrs"], ans: 2 },
+        { q: "Logical: MACHINE -> 19-7-9-14-15-20-11. DANGER -> ?", options: ["10-7-20-13-11-24", "11-7-20-16-11-24", "13-7-20-9-11-25", "10-7-20-10-11-25"], ans: 0 },
+        { q: "Logical: Missing number: 1, 4, 9, 16, 25, ?", options: ["30", "35", "36", "40"], ans: 2 },
+        { q: "Logical: Which is a leap year?", options: ["1900", "2000", "2100", "2200"], ans: 1 },
+        { q: "Logical: A is mother of B, B sister of C, C father of D. A to D?", options: ["Mother", "Grandmother", "Aunt", "Sister"], ans: 1 },
+        { q: "Coding: type([]) output in Python?", options: ["tuple", "list", "set", "dict"], ans: 1 },
+        { q: "Coding: Mutable data type?", options: ["String", "Tuple", "List", "Integer"], ans: 2 },
+        { q: "Coding: Python constructor?", options: ["def start()", "def __init__()", "def constructor()", "def main()"], ans: 1 },
+        { q: "Coding: 'break' function?", options: ["Skips iteration", "Exits loop", "Starts again", "Slows down"], ans: 1 },
+        { q: "OOPs: Method behaves differently based on object?", options: ["Abstraction", "Encapsulation", "Polymorphism", "Inheritance"], ans: 2 },
+        { q: "OOPs: Private member accessibility?", options: ["Global", "Only within class", "Child classes", "None"], ans: 1 },
+        { q: "OOPs: Same name, different parameters?", options: ["Overriding", "Overloading", "Inheritance", "Abstraction"], ans: 1 },
+        { q: "OOPs: Class that cannot be instantiated?", options: ["Concrete", "Abstract", "Final", "Static"], ans: 1 },
+        { q: "DSA: Time complexity of Linear Search?", options: ["O(1)", "O(log n)", "O(n)", "O(n^2)"], ans: 2 },
+        { q: "DSA: DS for Recursion?", options: ["Queue", "Stack", "Linked List", "Tree"], ans: 1 },
+        { q: "DSA: Singly Linked List node contents?", options: ["Prev pointer", "Next pointer", "Head", "Tail"], ans: 1 },
+        { q: "DSA: Worst-case O(n^2) sorting?", options: ["Merge Sort", "Quick Sort", "Bubble Sort", "Heap Sort"], ans: 2 }
+    ],
+    'Advanced': [
+        { q: "Aptitude: Tank filled in 18 mins with pipe 1 stopped. First pipe stop time?", options: ["6 min", "8 min", "10 min", "12 min"], ans: 1 },
+        { q: "Aptitude: 2 red, 3 green, 2 blue balls. Probability none is blue?", options: ["10/21", "11/21", "2/7", "5/7"], ans: 0 },
+        { q: "Aptitude: Sum amounts 6655 (3yr) & 7320.5 (4yr) compound. Rate?", options: ["5%", "10%", "12%", "15%"], ans: 1 },
+        { q: "Aptitude: Man 15km/hr still water, river 3km/hr. Distance place & back?", options: ["7.2 km", "8.5 km", "9 km", "6.8 km"], ans: 0 },
+        { q: "Logical: 1st Jan 2004 (Thu). 1st Jan 2005?", options: ["Friday", "Saturday", "Sunday", "Monday"], ans: 1 },
+        { q: "Logical: Poets/Painters/Day-dreamers logic?", options: ["Only I follows", "Only II follows", "Both follow", "Neither follows"], ans: 3 },
+        { q: "Logical: Series: 10, 14, 26, 42, 70, ?", options: ["100", "102", "114", "120"], ans: 2 },
+        { q: "Logical: Circle seating A-F. Who is between A and F?", options: ["E", "D", "C", "B"], ans: 1 },
+        { q: "Coding: What is a Generator in Python?", options: ["Returns list", "Yields iterator", "Creates classes", "Memory manager"], ans: 1 },
+        { q: "Coding: Python memory management?", options: ["Manually", "Ref counting & GC", "Stack only", "None"], ans: 1 },
+        { q: "Coding: *args and **kwargs purpose?", options: ["Fixed args", "Variable args", "Speed", "Imports"], ans: 1 },
+        { q: "Coding: [i for i in range(5) if i%2==0]?", options: ["[0, 2, 4]", "[1, 3]", "[0-4]", "Error"], ans: 0 },
+        { q: "OOPs: Python Multiple Inheritance support?", options: ["No", "Yes", "Interfaces only", "None"], ans: 1 },
+        { q: "OOPs: @staticmethod vs @classmethod?", options: ["No diff", "Classmethod takes cls", "Static takes self", "None"], ans: 1 },
+        { q: "OOPs: Principle violated if class modified instead of extended?", options: ["Dry", "Open-Closed", "Single Resp", "Liskov"], ans: 1 },
+        { q: "OOPs: Decorator use?", options: ["UI Design", "Modify behavior", "Delete classes", "Global vars"], ans: 1 },
+        { q: "DSA: Worst-case Quick Sort?", options: ["O(n log n)", "O(n^2)", "O(log n)", "O(n)"], ans: 1 },
+        { q: "DSA: Efficient DS for Priority Queue?", options: ["Array", "Linked List", "Binary Heap", "Hash Table"], ans: 2 },
+        { q: "DSA: Hash Table main advantage?", options: ["O(1) search", "Low memory", "Order", "Range query"], ans: 0 },
+        { q: "DSA: BST In-order traversal result?", options: ["Random", "Decreasing", "Increasing", "None"], ans: 2 }
+    ]
+};
+
+// Current Level selection
+const currentLevel = localStorage.getItem('userSkill') || 'Beginner';
+
+function startTest() {
+    testStarted = true;
+    document.getElementById('instruction-section').style.display = 'none';
+    document.getElementById('quiz-section').style.display = 'block';
+    loadQuestions();
+    startTimer();
+}
+
+function loadQuestions() {
+    document.getElementById('levelDisplay').innerText = "Level: " + currentLevel;
+    const questions = allQuestions[currentLevel];
+    const container = document.getElementById('questionsContainer');
+
+    // 1-20 Circle Navigation
+    let navHtml = `<div style="margin-bottom:20px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">`;
+    questions.forEach((_, i) => {
+        let isAnswered = userAnswers[i] !== undefined;
+        let isCurrent = i === currentQuestionIndex;
+        let bgColor = isCurrent ? '#00d4ff' : (isAnswered ? '#2ecc71' : '#fff');
+        let textColor = (isCurrent || isAnswered) ? 'white' : '#555';
+        navHtml += `<div onclick="goToQuestion(${i})" class="nav-box" style="background:${bgColor}; color:${textColor}; border:1px solid #ddd; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold;">${i+1}</div>`;
+    });
+    navHtml += `</div><hr style="margin-bottom:20px; border:0; border-top:1px solid #eee;">`;
+
+    // Active Question Display
+    const q = questions[currentQuestionIndex];
+    let qHtml = `<div class="question-block" style="border-left:5px solid #00d4ff;">
+        <p style="font-size:1.1rem;"><strong>Q${currentQuestionIndex + 1}:</strong> ${q.q}</p>
+        <div class="options-list">${q.options.map((opt, i) => `
+            <li style="list-style:none; margin:10px 0; background:white; border:1px solid #eee; border-radius:8px; padding:10px;">
+                <label style="cursor:pointer; display:block;">
+                    <input type="radio" name="q" value="${i}" ${userAnswers[currentQuestionIndex]==i?'checked':''} onchange="saveAnswer(${currentQuestionIndex}, ${i})"> ${opt}
+                </label>
+            </li>`).join('')}</div></div>`;
+
+    // Footer Buttons
+    let buttons = `<div style="display:flex; justify-content:space-between; margin-top:20px;">
+        <button type="button" class="auth-btn" style="background:#6c757d; color:white;" onclick="goToQuestion(${currentQuestionIndex-1})" ${currentQuestionIndex===0?'disabled':''}>Previous</button>
+        ${currentQuestionIndex < 19 ? 
+            `<button type="button" class="auth-btn" style="background:#00d4ff; color:white;" onclick="goToQuestion(${currentQuestionIndex+1})">Next Question</button>` : 
+            `<button type="button" class="auth-btn" style="background:#27ae60; color:white;" onclick="submitTest()">Submit Final Assessment</button>`}
+    </div>`;
+
+    container.innerHTML = navHtml + qHtml + buttons;
+}
+
+function saveAnswer(idx, val) { userAnswers[idx] = val; loadQuestions(); }
+function goToQuestion(idx) { if(idx >=0 && idx < 20) { currentQuestionIndex = idx; loadQuestions(); } }
+
+function startTimer() {
+    timer = setInterval(() => {
+        let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+        document.getElementById('time').innerText = `${m}:${s<10?'0':''}${s}`;
+        if (timeLeft-- <= 0) submitTest();
+    }, 1000);
+}
+
+async function submitTest() {
+    if(timer) clearInterval(timer);
+    testStarted = false;
+    let score = 0;
+    const questions = allQuestions[currentLevel];
+    
+    questions.forEach((item, i) => { 
+        if (userAnswers[i] != null && parseInt(userAnswers[i]) === item.ans) score++; 
+    });
+
+    let finalScore = score * 5; 
+    let email = localStorage.getItem('userEmail') || '';
+
+    if (score >= 10) {
+        alert(`Passed! Your score in ${currentLevel} level is ${finalScore}%. Generating Pathway...`);
+        // AI Path Generation logic
+        try {
+            const res = await fetch('http://127.0.0.1:8000/generate-ai-path/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ score: finalScore, level: currentLevel, email: email })
+            });
+            const data = await res.json();
+            localStorage.setItem('userRoadmap', JSON.stringify(data.roadmap));
+        } catch(e) { console.log("AI Error", e); }
+        
+        window.location.href = `/dashboard/?email=${email}&score=${finalScore}&level=${currentLevel}`;
+    } else {
+        alert(`Failed! Score: ${finalScore}%. Need 50% to pass. Try again!`);
+        location.reload();
+    }
+}
+
+// Security: Auto-submit on tab switch
+document.addEventListener("visibilitychange", () => { if (document.hidden && testStarted) submitTest(); });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AI Learning Path</title>
+    <link rel="stylesheet" href="basic.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">AI Learning Path</div>
+        <nav>
+            <a href="basic.html">Home</a>
+            <a href="#features">Features</a>
+            <a href="login.html">Login</a>
+            <a href="#signup-section" class="btn-signup">Sign Up</a>
+        </nav>
+    </header>
+
+    <section id="signup-section" class="auth-container bg-alt">
+        <div class="auth-card">
+            <h2>Create a New Account</h2>
+            <p class="subtitle">Get Started with AI Learning</p>
+            
+            <form id="registrationForm">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" placeholder="John Doe" required>
+                </div>
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="email@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Create password" required>
+                </div>
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+                </div>
+                <div class="terms">
+                    <label><input type="checkbox" required> I agree to the Terms and Conditions</label>
+                </div>
+                <button type="submit" class="auth-btn signup-btn">Register</button>
+            </form>
+            
+            <p class="redirect">Already have an account? <a href="login.html">Login</a></p>
+        </div>
+    </section>
+
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Page-ah login-ku pogaama thadukkum
+
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Password check
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            console.log("Django backend-ku data pogudhu...");
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/register/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert("Signup Success! ✅");
+                    // Adutha page-la user-ah identify panna email-ah save panrom
+                    localStorage.setItem('userEmail', email);
+                    // Ippo automatic-ah profile page-ku pogum
+                    window.location.href = "proinfo.html";
+                } else {
+                    alert("Error: " + (result.error || "Something went wrong"));
+                }
+            } catch (error) {
+                console.error("Connection Error:", error);
+                alert("Backend server (Django) run aagala. Terminal-la 'python manage.py runserver' check pannunga!");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<head>
+    <link rel="stylesheet" href="basic.css ">
+</head>
+<body>
+<header class="navbar">
+    <div class="logo">AI Learning Path</div>
+    <nav>
+        <a href="basic.html">Home</a>
+        <a href="#features">Features</a>
+        <a href="login.html">Login</a>
+        <a href="signup.html" class="btn-signup">Sign Up</a>
+    </nav>
+</header>
+
+<section id="login-section" class="auth-container">
+    <div class="auth-card">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Login to Your Account</p>
+        <form>
+            <div class="input-group">
+                <label>Email / Username</label>
+                <input type="text" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" placeholder="Enter password" required>
+            </div>
+            <div class="extra-options">
+                <label><input type="checkbox"> Remember Me</label>
+                <a href="#">Forgot Password?</a>
+            </div>
+            <button type="button" class="auth-btn" onclick="loginUser()">Login</button>
+
+<script>
+function loginUser() {
+    // 1. Get user input
+    const emailInput = document.querySelector('input[type="text"]');
+    const email = emailInput.value;
+    
+    // 2. Validation
+    if (email.trim() === "") {
+        alert("Please enter your email");
+        return;
+    }
+
+    // 3. Save to localStorage (Dashboard-la name/score fetch panna idhu venum)
+    localStorage.setItem("userEmail", email);
+    console.log("User logged in and data saved:", email);
+
+    // 4. Redirect to Home Page (basic.html)
+    window.location.href = "basic.html"; 
+}
+
+// Form 'Enter' key press panna redirect aaga idhu help pannum
+document.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    loginUser();
+});
+</script>
+
+</script>
+        </form>
+        <p class="redirect">New user? <a href="signup.html">Create an account</a></p>
+        <small class="security-note">🔐 Your data is safe and secure</small>
+    </div>
+</section>
+</body>

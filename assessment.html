@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Skill Assessment</title>
+    <link rel="stylesheet" href="basic.css">
+    <style>
+        .test-wrapper { max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; }
+        .header { display: flex; justify-content: space-between; position: sticky; top: 0; background: white; padding: 10px; border-bottom: 2px solid #eee; }
+        .timer { color: #e74c3c; font-weight: bold; font-size: 1.2rem; }
+        .question-block { margin: 25px 0; padding: 15px; border: 1px solid #f0f0f0; border-radius: 8px; }
+        .options-list { list-style: none; padding: 0; }
+        .options-list li { margin: 10px 0; }
+        .instructions { background: #fffbe6; border: 1px solid #ffe58f; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        #quiz-section { display: none; }
+    </style>
+</head>
+<body class="bg-alt">
+
+<div class="test-wrapper">
+    <div id="instruction-section">
+        <h2>Assessment Instructions</h2>
+        <div class="instructions">
+            <ul>
+                <li><strong>Total Questions:</strong> 20</li>
+                <li><strong>Time Limit:</strong> 25 Minutes</li>
+                <li><strong>Topics:</strong> Aptitude, Logical, Coding (DS/OOPs)</li>
+                <li><strong>Strict Mode:</strong> Do NOT switch tabs. Switching tabs will auto-submit the test.</li>
+            </ul>
+        </div>
+        <button onclick="startTest()" class="auth-btn">I am Ready - Start Test</button>
+    </div>
+
+    <div id="quiz-section">
+        <div class="header">
+            <h3 id="levelDisplay">Level: </h3>
+            <div class="timer">Time Left: <span id="time">25:00</span></div>
+        </div>
+        <form id="quizForm">
+            <div id="questionsContainer"></div>
+            <button type="submit" class="auth-btn">Submit Assessment</button>
+        </form>
+    </div>
+</div>
+
+<script>
+let timer;
+let timeLeft = 25 * 60; // 25 minutes
+
+// Tab Switch Prevention
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        alert("Tab switching detected! Your test is being submitted automatically.");
+        submitTest();
+    }
+});
+
+const allQuestions = {
+    'Beginner': [
+    // --- Aptitude (4 Questions) ---
+    { q: "Aptitude: A person buys a pen for ₹10 and sells it for ₹15. What is the profit percentage?", options: ["25%", "50%", "75%", "100%"], ans: 1 },
+    { q: "Aptitude: A train covers 120 km in 2 hours. What is its speed?", options: ["40 km/hr", "60 km/hr", "80 km/hr", "100 km/hr"], ans: 1 },
+    { q: "Aptitude: What is the average of 10, 20, and 30?", options: ["15", "20", "25", "30"], ans: 1 },
+    { q: "Aptitude: 20% of 150 is?", options: ["20", "30", "40", "50"], ans: 1 },
+
+    // --- Logical Reasoning (4 Questions) ---
+    { q: "Logical: Complete the series: 5, 10, 15, 20, ?", options: ["22", "25", "30", "28"], ans: 1 },
+    { q: "Logical: If 'APPLE' is coded as 'BQQMF', what is the code for 'BOY'?", options: ["CPZ", "AQX", "CNX", "DQZ"], ans: 0 },
+    { q: "Logical: Which word does NOT belong with the others?", options: ["Leopard", "Cougar", "Elephant", "Lion"], ans: 2 },
+    { q: "Logical: Pointing to a man, a girl said, 'He is the son of my grandfather's only child.' How is the man related to the girl?", options: ["Brother", "Father", "Uncle", "Cousin"], ans: 0 },
+
+    // --- Basic Coding (4 Questions) ---
+    { q: "Coding: Which of the following is used to take input from the user in Python?", options: ["get()", "input()", "read()", "scan()"], ans: 1 },
+    { q: "Coding: What is the output of 3 + 2 * 2 in most languages?", options: ["10", "7", "8", "6"], ans: 1 },
+    { q: "Coding: Which symbol is used for 'Assignment' in programming?", options: ["==", "=", ":=", "->"], ans: 1 },
+    { q: "Coding: Which extension is used for Python files?", options: [".py", ".python", ".pt", ".p"], ans: 0 },
+
+    // --- OOPs (4 Questions) ---
+    { q: "OOPs: If 'Car' is a Class, then 'My Maruti Swift' is an _______?", options: ["Function", "Object", "Variable", "Data Type"], ans: 1 },
+    { q: "OOPs: Which feature allows a child to use his father's properties?", options: ["Abstraction", "Inheritance", "Polymorphism", "Encapsulation"], ans: 1 },
+    { q: "OOPs: Hiding internal details and showing only essential features is?", options: ["Abstraction", "Inheritance", "Overloading", "Array"], ans: 0 },
+    { q: "OOPs: One name having many forms is called?", options: ["Polymorphism", "Inheritance", "Variable", "List"], ans: 0 },
+
+    // --- DSA (4 Questions) ---
+    { q: "DSA: Which data structure works on LIFO (Last In, First Out) principle?", options: ["Queue", "Stack", "Array", "Linked List"], ans: 1 },
+    { q: "DSA: Which data structure works on FIFO (First In, First Out) principle?", options: ["Stack", "Queue", "Tree", "Graph"], ans: 1 },
+    { q: "DSA: To find an element in a 'Sorted' list very quickly, which method is best?", options: ["Linear Search", "Binary Search", "Random Search", "None"], ans: 1 },
+    { q: "DSA: A data structure that looks like a family tree with nodes is called a _______?", options: ["Stack", "Array", "Tree", "Queue"], ans: 2 }
+],
+    'Intermediate': [
+    // --- Aptitude (4 Questions) ---
+    { q: "Aptitude: A sum of money at simple interest amounts to ₹815 in 3 years and to ₹854 in 4 years. The sum is?", options: ["₹650", "₹690", "₹698", "₹700"], ans: 2 },
+    { q: "Aptitude: If 15 men can reap a field in 35 days, in how many days will 21 men reap it?", options: ["25 days", "20 days", "15 days", "22 days"], ans: 0 },
+    { q: "Aptitude: The ratio of ages of A and B is 4:3. After 6 years, A will be 26 years old. B's present age is?", options: ["12", "15", "18", "21"], ans: 1 },
+    { q: "Aptitude: A pipe can fill a tank in 10 hours and another can empty it in 15 hours. If both are opened, the tank fills in?", options: ["20 hrs", "25 hrs", "30 hrs", "35 hrs"], ans: 2 },
+
+    // --- Logical Reasoning (4 Questions) ---
+    { q: "Logical: If 'MACHINE' is coded as 19-7-9-14-15-20-11, how will you code 'DANGER'?", options: ["10-7-20-13-11-24", "11-7-20-16-11-24", "13-7-20-9-11-25", "10-7-20-10-11-25"], ans: 0 },
+    { q: "Logical: Find the missing number: 1, 4, 9, 16, 25, ?", options: ["30", "35", "36", "40"], ans: 2 },
+    { q: "Logical: Which of the following is a leap year?", options: ["1900", "2000", "2100", "2200"], ans: 1 },
+    { q: "Logical: A is the mother of B. B is the sister of C. C is the father of D. How is A related to D?", options: ["Mother", "Grandmother", "Aunt", "Sister"], ans: 1 },
+
+    // --- Intermediate Coding (4 Questions) ---
+    { q: "Coding: What is the output of `print(type([]))` in Python?", options: ["<class 'tuple'>", "<class 'list'>", "<class 'set'>", "<class 'dict'>"], ans: 1 },
+    { q: "Coding: Which of these is a mutable data type in Python?", options: ["String", "Tuple", "List", "Integer"], ans: 2 },
+    { q: "Coding: How do you start a constructor in a Python class?", options: ["def start()", "def __init__()", "def constructor()", "def main()"], ans: 1 },
+    { q: "Coding: What does the 'break' keyword do in a loop?", options: ["Skips one iteration", "Exits the loop", "Starts the loop again", "Slows down the loop"], ans: 1 },
+
+    // --- OOPs (4 Questions) ---
+    { q: "OOPs: Which feature allows a method to behave differently based on the object calling it?", options: ["Abstraction", "Encapsulation", "Polymorphism", "Inheritance"], ans: 2 },
+    { q: "OOPs: What is a 'Private' member in a class?", options: ["Accessible everywhere", "Accessible only within the class", "Accessible only to child classes", "None"], ans: 1 },
+    { q: "OOPs: Creating multiple functions with the same name but different parameters is?", options: ["Method Overriding", "Method Overloading", "Inheritance", "Abstraction"], ans: 1 },
+    { q: "OOPs: A class that cannot be instantiated and is used only for inheritance is?", options: ["Concrete Class", "Abstract Class", "Final Class", "Static Class"], ans: 1 },
+
+    // --- DSA (4 Questions) ---
+    { q: "DSA: What is the time complexity of a Linear Search in an array of size n?", options: ["O(1)", "O(log n)", "O(n)", "O(n^2)"], ans: 2 },
+    { q: "DSA: Which data structure is used to implement Recursion?", options: ["Queue", "Stack", "Linked List", "Tree"], ans: 1 },
+    { q: "DSA: In a Singly Linked List, each node contains data and a _______?", options: ["Previous pointer", "Next pointer", "Head pointer", "Tail pointer"], ans: 1 },
+    { q: "DSA: Which sorting algorithm has a worst-case complexity of O(n^2)?", options: ["Merge Sort", "Quick Sort", "Bubble Sort", "Heap Sort"], ans: 2 }
+],
+    'Advanced': [
+    // --- Aptitude (4 Questions) ---
+    { q: "Aptitude: A tank can be filled by two pipes in 20 and 30 mins respectively. When the tank was empty, the two pipes were opened. After some time, the first pipe was stopped and the tank was filled in 18 mins. After how much time was the first pipe stopped?", options: ["6 min", "8 min", "10 min", "12 min"], ans: 1 },
+    { q: "Aptitude: A bag contains 2 red, 3 green, and 2 blue balls. Two balls are drawn at random. What is the probability that none of the balls drawn is blue?", options: ["10/21", "11/21", "2/7", "5/7"], ans: 0 },
+    { q: "Aptitude: A sum of money amounts to ₹6655 in 3 years and ₹7320.50 in 4 years on compound interest. The rate of interest is?", options: ["5%", "10%", "12%", "15%"], ans: 1 },
+    { q: "Aptitude: A man can row 15 km/hr in still water. If the river is running at 3 km/hr, it takes 1 hour to row to a place and back. How far is the place?", options: ["7.2 km", "8.5 km", "9 km", "6.8 km"], ans: 0 },
+
+    // --- Logical Reasoning (4 Questions) ---
+    { q: "Logical: If 1st Jan 2004 was a Thursday, what day of the week was 1st Jan 2005?", options: ["Friday", "Saturday", "Sunday", "Monday"], ans: 1 },
+    { q: "Logical: Statements: All poets are day-dreamers. All painters are day-dreamers. Conclusion: (I) All painters are poets. (II) Some day-dreamers are not painters.", options: ["Only I follows", "Only II follows", "Both follow", "Neither follows"], ans: 3 },
+    { q: "Logical: Find the next term in the series: 10, 14, 26, 42, 70, ?", options: ["100", "102", "114", "120"], ans: 2 },
+    { q: "Logical: Six persons A, B, C, D, E, F are sitting in a circle. B is between F and C; A is between E and D; F is to the left of D. Who is between A and F?", options: ["E", "D", "C", "B"], ans: 1 },
+
+    // --- Advanced Coding (4 Questions) ---
+    { q: "Coding: What is a 'Generator' in Python?", options: ["A function that returns a list", "A function that yields an iterator", "A tool to create classes", "A memory management system"], ans: 1 },
+    { q: "Coding: How is memory managed in Python?", options: ["Manually by developer", "Reference counting & Garbage collection", "Only Stack allocation", "None of the above"], ans: 1 },
+    { q: "Coding: What is the purpose of `*args` and `**kwargs` in Python functions?", options: ["To define fixed arguments", "To pass variable number of arguments", "To speed up execution", "To import external modules"], ans: 1 },
+    { q: "Coding: What is the output of `[i for i in range(5) if i%2==0]`?", options: ["[0, 2, 4]", "[1, 3]", "[0, 1, 2, 3, 4]", "Error"], ans: 0 },
+
+    // --- OOPs (4 Questions) ---
+    { q: "OOPs: What is 'Multiple Inheritance' and does Python support it?", options: ["One class from one parent; No", "One class from many parents; Yes", "Many classes from one parent; Yes", "None"], ans: 1 },
+    { q: "OOPs: What is the difference between `@staticmethod` and `@classmethod`?", options: ["No difference", "Classmethod takes 'cls' as first argument", "Staticmethod takes 'self' as first argument", "None"], ans: 1 },
+    { q: "OOPs: Which OOP principle is violated if a class is modified instead of extended?", options: ["Dry Principle", "Open-Closed Principle", "Single Responsibility", "Liskov Substitution"], ans: 1 },
+    { q: "OOPs: What is a 'Decorator' used for?", options: ["To design UI", "To modify function behavior without changing code", "To delete classes", "To store global variables"], ans: 1 },
+
+    // --- DSA (4 Questions) ---
+    { q: "DSA: What is the worst-case time complexity of Quick Sort?", options: ["O(n log n)", "O(n^2)", "O(log n)", "O(n)"], ans: 1 },
+    { q: "DSA: Which data structure is most efficient for implementing a Priority Queue?", options: ["Array", "Linked List", "Binary Heap", "Hash Table"], ans: 2 },
+    { q: "DSA: What is the main advantage of a Hash Table?", options: ["Constant time search (O(1))", "Low memory usage", "Preserves order", "Supports range queries"], ans: 0 },
+    { q: "DSA: In a Binary Search Tree, what is the 'In-order' traversal result?", options: ["Nodes in random order", "Nodes in decreasing order", "Nodes in increasing order", "None"], ans: 2 }
+],
+};
+
+function startTest() {
+    document.getElementById('instruction-section').style.display = 'none';
+    document.getElementById('quiz-section').style.display = 'block';
+    loadQuestions();
+    startTimer();
+}
+
+function loadQuestions() {
+    const level = localStorage.getItem('userSkill') || 'Beginner';
+    document.getElementById('levelDisplay').innerText = "Level: " + level;
+    const container = document.getElementById('questionsContainer');
+    const questions = allQuestions[level];
+
+    questions.forEach((item, i) => {
+        container.innerHTML += `
+            <div class="question-block">
+                <p><strong>Q${i+1}:</strong> ${item.q}</p>
+                <div class="options-list">
+                    ${item.options.map((opt, index) => `
+                        <li><input type="radio" name="q${i}" value="${index}" required> ${opt}</li>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
+}
+
+function startTimer() {
+    timer = setInterval(() => {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        document.getElementById('time').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            submitTest();
+        }
+        timeLeft--;
+    }, 1000);
+}
+
+document.getElementById('quizForm').onsubmit = (e) => {
+    e.preventDefault();
+    submitTest();
+};
+
+function submitTest() {
+    clearInterval(timer);
+    alert("Test Submitted! Analysing your performance for AI Path Generation...");
+    window.location.href = "/dashboard/";
+}
+async function submitAssessment() {
+    const score = calculateScore(); // Unga logic-padi score calculate pannunga
+    const email = localStorage.getItem('userEmail');
+
+    const response = await fetch('http://127.0.0.1:8000/generate-ai-path/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, score: score })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        // AI generate panna roadmap-ah save pannikko
+        localStorage.setItem('userRoadmap', JSON.stringify(data.roadmap));
+        window.location.href = "dashboard.html";
+    }
+}
+async function submitAssessment() {
+    // 1. Show Loading (AI is thinking...)
+    document.getElementById('assessment-container').innerHTML = "<h2>AI is generating your path...</h2>";
+
+    const score = calculateScore(); 
+    const email = localStorage.getItem('userEmail');
+
+    // 2. Fetch from Django
+    const response = await fetch('http://127.0.0.1:8000/generate-ai-path/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, score: score })
+    });
+
+    const data = await response.json();
+
+    // 3. Display Results directly on screen
+    displayAIResult(data.roadmap);
+}
+
+function displayAIResult(roadmap) {
+    let html = "<h2>Your Personalized AI Learning Path</h2>";
+    roadmap.forEach(step => {
+        html += `
+            <div class="path-card" style="background: white; color: black; margin: 10px; padding: 15px; border-radius: 10px; border-left: 5px solid #00d4ff;">
+                <h3>${step.title}</h3>
+                <p>${step.desc}</p>
+            </div>
+        `;
+    });
+    document.body.innerHTML = `<div class="result-container">${html}</div>`;
+}
+</script>
+</body>
+</html>
