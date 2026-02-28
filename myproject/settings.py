@@ -83,6 +83,6 @@ CSRF_TRUSTED_ORIGINS = ['https://dreamy-correctly-jewell.ngrok-free.dev']
 import os
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-ALLOWED_HOSTS = ['ai-learning-path-6.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['ai-learning-path-7l4x.onrender.com', 'localhost', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = ['https://ai-learning-path-6.onrender.com']
