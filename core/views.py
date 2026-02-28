@@ -1,5 +1,5 @@
 import json
-import google.generativeai as genai  # Use the working library
+import google.generativeai as genai
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -28,7 +28,6 @@ def register_user(request):
 def login_user(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        # Login aana udane assessment-ku redirect pannuroam
         return redirect(f'/assessment/?email={email}')
     return render(request, 'login.html')
 
@@ -38,7 +37,6 @@ def assessment_view(request):
     if request.method == 'POST':
         user_email = request.POST.get('email')
         final_score = 75 
-        # Test mudinja udane dashboard-ku redirect
         return redirect(f'/dashboard/?email={user_email}&score={final_score}')
     return render(request, 'assessment.html', {'email': email})
 
@@ -113,10 +111,3 @@ def add_activity(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Invalid method'}, status=405)
-def add_activity(request): # Zero spaces at the start
-    if request.method == 'POST': # 4 spaces inside the function
-        try:
-            # ... baaki code ...
-        # ... your logic ...
-        return redirect('profile') # This MUST be indented inside the function
-    return render(request, 'signup.html')
