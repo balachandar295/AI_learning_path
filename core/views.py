@@ -113,8 +113,8 @@ def add_activity(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Invalid method'}, status=405)
-   def add_activity(request): # Line 116
-    if request.method == 'POST': # Line 117 (IPPO CORRECT - kulla irukku)
+def add_activity(request): # Zero spaces at the start
+    if request.method == 'POST': # 4 spaces inside the function
         try:
             # ... baaki code ...
         # ... your logic ...
