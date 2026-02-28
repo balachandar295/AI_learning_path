@@ -245,3 +245,6 @@ def add_activity(request):
 
 # To this:
 import google.genai as genai
+return redirect('profile')
+return redirect('assessment')
+return redirect('dashboard')
