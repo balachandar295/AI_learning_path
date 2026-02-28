@@ -113,3 +113,8 @@ def add_activity(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Invalid method'}, status=405)
+    def register_user(request):
+    if request.method == 'POST':
+        # ... your logic ...
+        return redirect('profile') # This MUST be indented inside the function
+    return render(request, 'signup.html')
